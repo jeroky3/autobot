@@ -1,0 +1,7 @@
+pip instgall pyqt5
+pip instgall pymysql
+pip instgall pandas
+pip install cryptography
+pip install lxml
+pip install html5lib
+pip install bs4
