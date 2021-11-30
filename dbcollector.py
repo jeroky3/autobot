@@ -236,9 +236,12 @@ class DbCollector(QAxWidget):
         #print(self.trData)
 
     def update_stock_info(self):
+        # check table date
+        if self.mysqldbctrl.checktablehasthecolumn('update_table_date', 'stock_info', datetime.datetime.now().date()):
+            return
 
         # clear Table
-        #self.mysqldbctrl.clear_table('stock_info')
+        self.mysqldbctrl.clear_table('stock_info')
 
         krxcollecting = True
         if krxcollecting is True:
@@ -246,6 +249,7 @@ class DbCollector(QAxWidget):
         else:
             self.update_stock_info_from_openapi()
 
+        self.mysqldbctrl.update_date_table_done('stock_info')
 
     def update_stock_info_from_krx(self):
         #krx 사이트에서 가져오는 게 더 정확하다.

@@ -271,6 +271,32 @@ class mysql_db_ctrl:
                       ') '
             self.create_table(self.stock_conn, 'livingrate', tempsql)
 
+
+        # updatetabledate
+        # id stock_info stock_history stock_report stock_daily stock_min index_history news_info  oil currency livingrate
+        if not self.tableexists('update_table_date'):
+            tempsql = 'CREATE TABLE {} (' \
+                      'id int AUTO_INCREMENT PRIMARY KEY,' \
+                      'stocktableid int, ' \
+                      'stock_info date, ' \
+                      'stock_history date, ' \
+                      'stock_report date, ' \
+                      'stock_daily date, ' \
+                      'stock_min date, ' \
+                      'index_history date, ' \
+                      'news_info date, ' \
+                      'oil date, ' \
+                      'currency date, ' \
+                      'livingrate date ' \
+                      ') '
+            self.create_table(self.stock_conn, 'update_table_date', tempsql)
+
+            sql = "INSERT INTO update_table_date (stocktableid) VALUES (1)"
+            with self.stock_conn.cursor() as cursor:
+                cursor.execute(sql)
+                self.stock_conn.commit()
+
+
         # stock_daily
         # id, date, code, stockname, profitrate, close, open, high, low, volume, vol5rate,
         # closeavg5, closeavg10, closeavg20, closeavg60, closeavg120
@@ -359,6 +385,17 @@ class mysql_db_ctrl:
             self.stock_conn.commit()
 
         return exists
+
+    def update_date_table_done(self, colname):
+        """ update row """
+        sql = "UPDATE update_table_date set {} = '{}' where stocktableid = 1".format(colname, datetime.datetime.now().date())
+        with self.stock_conn.cursor() as cursor:
+            cursor.execute(sql)
+            self.stock_conn.commit()
+
+
+
+
 
 if __name__ == '__main__':
     mysql_db_ctrl()
