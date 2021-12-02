@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import *
 import pymysql
 import pandas as pd
 from mysqldbctrl import *
-
+from commonutil import *
 
 class DbCollector(QAxWidget):
     def __init__(self):
@@ -18,6 +18,7 @@ class DbCollector(QAxWidget):
 
         self.trData = None
         self.rqcount = 0
+        self.strcodelist = []
 
         self.setControl("KHOPENAPI.KHOpenAPICtrl.1")
         self.OnEventConnect.connect(self.eventConnect)
@@ -37,6 +38,7 @@ class DbCollector(QAxWidget):
 
         self.mysqldbctrl = mysql_db_ctrl()
         self.update_stock_info()
+        self.update_stock_daily()
 
     def eventConnect(self, nErrCode):
         if nErrCode == 0:
@@ -118,7 +120,53 @@ class DbCollector(QAxWidget):
                 self.trData.append(int(val) if val != '' else None)
                 val = self.getopt10001reqdata(sTrCode, sRQName, nCnt, "당기순이익")
                 self.trData.append(int(val) if val != '' else None)
-
+            elif sRQName == 'opt10086req':
+                self.trData = []
+                for nIdx in range(0, nCnt):
+                    temptrdata = []
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "날짜")
+                    temptrdata.append(val)
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "시가")
+                    temptrdata.append(val)
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "고가")
+                    temptrdata.append(val)
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "저가")
+                    temptrdata.append(val)
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "종가")
+                    temptrdata.append(int(val))
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "전일비")
+                    temptrdata.append(decimal.Decimal(val) if val != '' else decimal.Decimal(0))
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "등락률")
+                    temptrdata.append(decimal.Decimal(val) if val != '' else decimal.Decimal(0))
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "거래량")
+                    temptrdata.append(val if val != '' else 0)
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "금액(백만)")
+                    temptrdata.append(decimal.Decimal(val) if val != '' else None)
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "신용비")
+                    temptrdata.append(decimal.Decimal(val) if val != '' else decimal.Decimal(0))
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "개인")
+                    temptrdata.append(val if val != '' else 0)
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "기관")
+                    temptrdata.append(val if val != '' else 0)
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "외인수량")
+                    temptrdata.append(val if val != '' else 0)
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "외국계")
+                    temptrdata.append(val if val != '' else 0)
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "프로그램")
+                    temptrdata.append(val if val != '' else 0)
+                    #val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "외인비") 외인보유와 같다.
+                    #temptrdata.append(decimal.Decimal(val) if val != '' else decimal.Decimal(0))
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "외인보유")
+                    temptrdata.append(decimal.Decimal(val) if val != '' else decimal.Decimal(0))
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "외인순매수")
+                    temptrdata.append(val if val != '' else 0)
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "기관순매수")
+                    temptrdata.append(val if val != '' else 0)
+                    val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "개인순매수")
+                    temptrdata.append(val if val != '' else 0)
+                    #val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "신용잔고율")  신용비와 같다.
+                    #temptrdata.append(decimal.Decimal(val) if val != '' else decimal.Decimal(0))
+                    self.trData.append(temptrdata)
         except TypeError as e:
             print('error receiveTrData', e)
 
@@ -235,22 +283,6 @@ class DbCollector(QAxWidget):
         lRet = self.commrqdata("opt10001req", "OPT10001", "0", "1000")
         #print(self.trData)
 
-    def update_stock_info(self):
-        # check table date
-        if self.mysqldbctrl.checktablehasthecolumn('update_table_date', 'stock_info', datetime.datetime.now().date()):
-            return
-
-        # clear Table
-        self.mysqldbctrl.clear_table('stock_info')
-
-        krxcollecting = True
-        if krxcollecting is True:
-            self.update_stock_info_from_krx()
-        else:
-            self.update_stock_info_from_openapi()
-
-        self.mysqldbctrl.update_date_table_done('stock_info')
-
     def update_stock_info_from_krx(self):
         #krx 사이트에서 가져오는 게 더 정확하다.
         markettypes = ['stockMkt', 'kosdaqMkt', 'konexMkt']
@@ -263,11 +295,13 @@ class DbCollector(QAxWidget):
             stockdf[0] = stockdf[0].rename(
                 columns={'회사명': 'codename', '종목코드': 'code', '업종':'kind',
                          '주요제품': 'majorproduct', '상장일': 'createdate', '대표자명': 'ceo', '지역': 'home'})
-            strcodelist = stockdf[0].code
+
+            self.strcodelist.append(stockdf[0].code)
+            continue
 
             kospidaq = marketkind[i]
 
-            for code in strcodelist:
+            for code in self.strcodelist[i]:
                 # check if table has the code
                 if self.mysqldbctrl.checktablehasthecolumn('stock_info', 'code', code):
                     continue
@@ -332,36 +366,31 @@ class DbCollector(QAxWidget):
                 # datetime.date(1992, 2, 21), '거래소', '', '', '금융업', '정상', '증거금40%']
                 self.mysqldbctrl.insertstockinfo(sql, tuple(data))
 
+    """
     def update_stock_info_from_openapi(self):
 
-        #stockinfo = self.KOA_Functions("GetMasterStockInfo", "395400")
-        #print(stockinfo)
-        #return
+        # # Open API 로 Stock Info 를 가져온다.
+        # GetCodeListByMarket(BSTR sMarket // 시장구분값)
+        # [시장구분값]
+        # 0: 코스피 => 코스피 종목 분류시 ETF,ETN, 뮤추얼펀드, 리츠등의 종목을 포함, 상장폐지 종목도 데이터 처리를 위해 대략 3일정도 유지
+        # 10: 코스닥
+        # 3: ELW
+        # 8: ETF
+        # 50: KONEX
+        # 4: 뮤추얼펀드
+        # 5: 신주인수권
+        # 6: 리츠
+        # 9: 하이얼펀드
+        # 30: K - OTC
 
-
-        """
-        # Open API 로 Stock Info 를 가져온다.
-        GetCodeListByMarket(BSTR sMarket // 시장구분값)
-        [시장구분값]
-        0: 코스피 => 코스피 종목 분류시 ETF,ETN, 뮤추얼펀드, 리츠등의 종목을 포함, 상장폐지 종목도 데이터 처리를 위해 대략 3일정도 유지
-        10: 코스닥
-        3: ELW
-        8: ETF
-        50: KONEX
-        4: 뮤추얼펀드
-        5: 신주인수권
-        6: 리츠
-        9: 하이얼펀드
-        30: K - OTC
-        """
         # 쿼리 코드리스트 수 kospi count : 12110,  kosdaq count : 10717, konex count :
         # 시장구분이 거래소만 : about 919
         # krx 사이트 종목수 : 940  1,531  131 = 2602
         codelist = self.dynamicCall("GetCodeListByMarket(QString)", "0")
-        strcodelist = codelist.split(';')
+        self.strcodelist = codelist.split(';')
         #print('Kosdaq Code Count : ', len(codelist))
 
-        for code in strcodelist:
+        for code in self.strcodelist:
 
             # check if table has the code
             if self.mysqldbctrl.checktablehasthecolumn('stock_info', 'code', code):
@@ -425,8 +454,85 @@ class DbCollector(QAxWidget):
             # None, None, None, None, None, None,
             # datetime.date(1992, 2, 21), '거래소', '', '', '금융업', '정상', '증거금40%']
             self.mysqldbctrl.insertstockinfo(sql, tuple(data))
+    """
 
 
+    def update_stock_info(self):
+        # check table date
+        #if self.mysqldbctrl.checktablehasthecolumn('update_table_date', 'stock_info', datetime.datetime.now().date()):
+        #    return
+
+        # clear Table
+        self.mysqldbctrl.clear_table('stock_info')
+
+        # 종목 정보 갱신
+        krxcollecting = True
+        if krxcollecting is True:
+            self.update_stock_info_from_krx()
+        #else:
+        #    self.update_stock_info_from_openapi()
+
+        self.mysqldbctrl.update_date_table_done('stock_info')
+
+    #[opt10086: 일별주가요청]
+    def getstockdaily(self, code):
+        self.setinputvalue("종목코드", "000020")
+
+        #조회일자 = YYYYMMDD(20160101 연도4자리, 월2자리, 일2자리 형식)
+        self.setinputvalue("조회일자", "20211201")
+
+        #표시구분 = 0:수량, 1: 금액(백만원)
+        self.setinputvalue("표시구분", "0")
+
+        lRet = self.commrqdata("opt10086req", "OPT10086", "0", "1000")
+        #time.sleep(1)
+
+        # 거래량 5, 20일 이동평균
+        # 종가 5, 20, 60, 120일 이동평균
+        voldata = getdata(7, self.trData)
+        closedata = getdata(4, self.trData)
+        for i, d in enumerate(self.trData):
+            d.append(getavg(i, 5, voldata))
+            d.append(getavg(i, 20, voldata))
+            d.append(getavg(i, 5, closedata))
+            d.append(getavg(i, 20, closedata))
+            d.append(getavg(i, 60, closedata))
+            d.append(getavg(i, 120, closedata))
+
+        # database save
+        sql = "INSERT INTO stock_info (code, name, facevalue, facevalueunit, capital, stockcnt, marketcap, foreignrate, " \
+              "PER, EPS, ROE, PBR, EV, BPS, " \
+              "salesrevenue, opincome, netincome, " \
+              "createdate, kospidaq, stocksize, thema, kind, construction, stockstate, majorproduct, ceo, home) " \
+              "VALUES( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, " \
+              "%s, %s, %s)"
+
+        data = self.trData
+        # print(code, codename)
+
+        self.mysqldbctrl.insertstockdaily(sql, tuple(data))
+
+
+
+    def update_stock_daily(self):
+
+        for i in range(0, 3):
+            for code in self.strcodelist[i]:
+
+                self.mysqldbctrl.create_stock_daily_table(code)
+
+                # stock_daily 데이터 요청
+                self.getstockdaily(code)
+
+                # database save
+                sql = "INSERT INTO stock_info (code, name, facevalue, facevalueunit, capital, stockcnt, marketcap, foreignrate, " \
+                      "PER, EPS, ROE, PBR, EV, BPS, " \
+                      "salesrevenue, opincome, netincome, " \
+                      "createdate, kospidaq, stocksize, thema, kind, construction, stockstate)" \
+                      "VALUES( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+                data = self.trData
+                self.mysqldbctrl.insertstockdaily(sql, tuple(data))
 
 
 if __name__ == '__main__':

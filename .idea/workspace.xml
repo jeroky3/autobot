@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="49d2a45b-66af-4aeb-9841-044c26004eee" name="Changes" comment="">
+    <list default="true" id="49d2a45b-66af-4aeb-9841-044c26004eee" name="Changes" comment="create table update_table_date&#10;update whether stock_info is done">
+      <change afterPath="$PROJECT_DIR$/commonutil.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dbcollector.py" beforeDir="false" afterPath="$PROJECT_DIR$/dbcollector.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mysqldbctrl.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysqldbctrl.py" afterDir="false" />
@@ -10,6 +11,13 @@
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -62,6 +70,14 @@
       <option name="presentableId" value="Default" />
       <updated>1637992784664</updated>
     </task>
+    <task id="LOCAL-00001" summary="create table update_table_date&#10;update whether stock_info is done">
+      <created>1638239574008</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1638239574008</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -75,5 +91,20 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="create table update_table_date&#10;update whether stock_info is done" />
+    <option name="LAST_COMMIT_MESSAGE" value="create table update_table_date&#10;update whether stock_info is done" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dbcollector.py</url>
+          <line>491</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -86,6 +86,7 @@ class mysql_db_ctrl:
         return exists
 
     def create_tables_all(self):
+
         # users
         if not self.tableexists('users'):
             tempsql = 'CREATE TABLE {} (' \
@@ -100,6 +101,30 @@ class mysql_db_ctrl:
         # algorithm
 
         # backtesting
+
+        # updatetabledate
+        # id stock_info stock_history stock_report stock_daily stock_min index_history news_info  oil currency livingrate
+        if not self.tableexists('update_table_date'):
+            tempsql = 'CREATE TABLE {} (' \
+                      'id int AUTO_INCREMENT PRIMARY KEY,' \
+                      'stocktableid int, ' \
+                      'stock_info date, ' \
+                      'stock_history date, ' \
+                      'stock_report date, ' \
+                      'stock_daily date, ' \
+                      'stock_min date, ' \
+                      'index_history date, ' \
+                      'news_info date, ' \
+                      'oil date, ' \
+                      'currency date, ' \
+                      'livingrate date ' \
+                      ') '
+            self.create_table(self.stock_conn, 'update_table_date', tempsql)
+
+            sql = "INSERT INTO update_table_date (stocktableid) VALUES (1)"
+            with self.stock_conn.cursor() as cursor:
+                cursor.execute(sql)
+                self.stock_conn.commit()
 
         # stock_info
         # id, code, name, createdate(상장일), kospidaq(0:kospi, 1:kosdaq),
@@ -271,67 +296,6 @@ class mysql_db_ctrl:
                       ') '
             self.create_table(self.stock_conn, 'livingrate', tempsql)
 
-
-        # updatetabledate
-        # id stock_info stock_history stock_report stock_daily stock_min index_history news_info  oil currency livingrate
-        if not self.tableexists('update_table_date'):
-            tempsql = 'CREATE TABLE {} (' \
-                      'id int AUTO_INCREMENT PRIMARY KEY,' \
-                      'stocktableid int, ' \
-                      'stock_info date, ' \
-                      'stock_history date, ' \
-                      'stock_report date, ' \
-                      'stock_daily date, ' \
-                      'stock_min date, ' \
-                      'index_history date, ' \
-                      'news_info date, ' \
-                      'oil date, ' \
-                      'currency date, ' \
-                      'livingrate date ' \
-                      ') '
-            self.create_table(self.stock_conn, 'update_table_date', tempsql)
-
-            sql = "INSERT INTO update_table_date (stocktableid) VALUES (1)"
-            with self.stock_conn.cursor() as cursor:
-                cursor.execute(sql)
-                self.stock_conn.commit()
-
-
-        # stock_daily
-        # id, date, code, stockname, profitrate, close, open, high, low, volume, vol5rate,
-        # closeavg5, closeavg10, closeavg20, closeavg60, closeavg120
-        # closeavg5rate, closeavg10rate, closeavg20rate, closeavg60rate, closeavg120rate
-        """
-        datestr = 'a' + datetime.date.today().strftime("%Y%m%d")
-        if not self.tableexists(datestr):
-            tempsql = 'CREATE TABLE {} (' \
-                      'id int AUTO_INCREMENT PRIMARY KEY, ' \
-                      'date date, ' \
-                      'code varchar(10), ' \
-                      'stockname varchar(255), ' \
-                      'profitrate decimal(6,2), ' \
-                      'close int, ' \
-                      'open int, ' \
-                      'high int, ' \
-                      'low int, ' \
-                      'volume int, ' \
-                      'vol5rate decimal(6,2), ' \
-                      'vol20rate decimal(6,2), ' \
-                      'closeavg5 int, ' \
-                      'closeavg10 int, ' \
-                      'closeavg20 int, ' \
-                      'closeavg60 int, ' \
-                      'closeavg120 int, ' \
-                      'closeavg5rate decimal(6,2), ' \
-                      'closeavg10rate decimal(6,2), ' \
-                      'closeavg20rate decimal(6,2), '\
-                      'closeavg60rate decimal(6,2), ' \
-                      'closeavg120rate decimal(6,2) ' \
-                    ') '
-
-            self.create_table(self.stock_dm_conn, datestr, tempsql)
-        """
-
     def create_table(self, dbconn, tablename, sql):
         try:
             with dbconn.cursor() as cursor:
@@ -370,6 +334,14 @@ class mysql_db_ctrl:
                 cursor.execute(sql, data)
             self.stock_conn.commit()
 
+    def insertstockdaily(self, sql, data=None):
+        with self.stock_dm_conn.cursor() as cursor:
+            if data is None:
+                cursor.execute(sql)
+            else:
+                cursor.execute(sql, data)
+            self.stock_dm_conn.commit()
+
 
     def checktablehasthecolumn(self, tablename, colname, coldata):
         exists = False
@@ -393,8 +365,44 @@ class mysql_db_ctrl:
             cursor.execute(sql)
             self.stock_conn.commit()
 
+    def create_stock_daily_table(self, code):
+        # stock_daily
+        # id, date, code, stockname, profitrate, close, open, high, low,
+        # volume, volavg5, volavg20,
+        # closeavg5, closeavg20, closeavg60, closeavg120
+        # closeavg5rate, closeavg20rate, closeavg60rate, closeavg120rate
+        tablename = 'A' + code
+        if not self.tableexists(tablename):
+            tempsql = 'CREATE TABLE {} (' \
+                      'id int AUTO_INCREMENT PRIMARY KEY, ' \
+                      'stockdate date, ' \
+                      'open int, ' \
+                      'high int, ' \
+                      'low int, ' \
+                      'close int, ' \
+                      'profit decimal(6,2), ' \
+                      'profitrate decimal(6,2), ' \
+                      'volume int, ' \
+                      'volumemoney int, ' \
+                      'creditrate decimal(6,2), ' \
+                      'personalvol int, ' \
+                      'investmentvol int, ' \
+                      'foreignvol int, ' \
+                      'foreignersvol int, ' \
+                      'program int, ' \
+                      'foreignrate decimal(6,2), ' \
+                      'foreignbuy int, ' \
+                      'investmentbuy int, '\
+                      'personalbuy int, ' \
+                      'volavg5 int, ' \
+                      'volavg20 int, ' \
+                      'closeavg5 int, ' \
+                      'closeavg20 int, ' \
+                      'closeavg60 int, ' \
+                      'closeavg120 int' \
+                      ') '
 
-
+            self.create_table(self.stock_dm_conn, tablename, tempsql)
 
 
 if __name__ == '__main__':
