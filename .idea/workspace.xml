@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="49d2a45b-66af-4aeb-9841-044c26004eee" name="Changes" comment="create table update_table_date&#10;update whether stock_info is done">
-      <change afterPath="$PROJECT_DIR$/commonutil.py" afterDir="false" />
+    <list default="true" id="49d2a45b-66af-4aeb-9841-044c26004eee" name="Changes" comment="commonutil added&#10;collecting stock_daily table data...">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/commonutil.py" beforeDir="false" afterPath="$PROJECT_DIR$/commonutil.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dbcollector.py" beforeDir="false" afterPath="$PROJECT_DIR$/dbcollector.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mysqldbctrl.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysqldbctrl.py" afterDir="false" />
     </list>
@@ -77,7 +77,14 @@
       <option name="project" value="LOCAL" />
       <updated>1638239574008</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="commonutil added&#10;collecting stock_daily table data...">
+      <created>1638423392209</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1638423392209</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -94,15 +101,16 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="create table update_table_date&#10;update whether stock_info is done" />
-    <option name="LAST_COMMIT_MESSAGE" value="create table update_table_date&#10;update whether stock_info is done" />
+    <MESSAGE value="commonutil added&#10;collecting stock_daily table data..." />
+    <option name="LAST_COMMIT_MESSAGE" value="commonutil added&#10;collecting stock_daily table data..." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/dbcollector.py</url>
-          <line>491</line>
-          <option name="timeStamp" value="1" />
+          <line>592</line>
+          <option name="timeStamp" value="23" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

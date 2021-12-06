@@ -143,7 +143,7 @@ class mysql_db_ctrl:
                       'capital int, ' \
                       'stockcnt int, ' \
                       'marketcap int, ' \
-                      'foreignrate decimal(4,2), ' \
+                      'foreignrate decimal(6,2), ' \
                       'PER decimal(8,2), ' \
                       'EPS int, ' \
                       'ROE decimal(8,2), ' \
@@ -262,10 +262,10 @@ class mysql_db_ctrl:
             tempsql = 'CREATE TABLE {} (' \
                       'id int AUTO_INCREMENT PRIMARY KEY,' \
                       'date datetime, ' \
-                      'brent decimal(6,2), ' \
-                      'gas decimal(6,2), '\
-                      'wti decimal(6,2), ' \
-                      'dubai decimal(6,2) ' \
+                      'brent decimal(8,2), ' \
+                      'gas decimal(8,2), '\
+                      'wti decimal(8,2), ' \
+                      'dubai decimal(8,2) ' \
                       ') '
             self.create_table(self.stock_conn, 'oil', tempsql)
 
@@ -288,11 +288,11 @@ class mysql_db_ctrl:
             tempsql = 'CREATE TABLE {} (' \
                       'id int AUTO_INCREMENT PRIMARY KEY,' \
                       'date date, ' \
-                      'us decimal(6,2), ' \
-                      'kr decimal(6,2), '\
-                      'eu decimal(6,2), ' \
-                      'jp decimal(6,2), ' \
-                      'cn decimal(6,2) ' \
+                      'us decimal(8,2), ' \
+                      'kr decimal(8,2), '\
+                      'eu decimal(8,2), ' \
+                      'jp decimal(8,2), ' \
+                      'cn decimal(8,2) ' \
                       ') '
             self.create_table(self.stock_conn, 'livingrate', tempsql)
 
@@ -365,6 +365,7 @@ class mysql_db_ctrl:
             cursor.execute(sql)
             self.stock_conn.commit()
 
+    # stock_daily
     def create_stock_daily_table(self, code):
         # stock_daily
         # id, date, code, stockname, profitrate, close, open, high, low,
@@ -380,7 +381,7 @@ class mysql_db_ctrl:
                       'high int, ' \
                       'low int, ' \
                       'close int, ' \
-                      'profit decimal(6,2), ' \
+                      'profit decimal(8,2), ' \
                       'profitrate decimal(6,2), ' \
                       'volume int, ' \
                       'volumemoney int, ' \
@@ -404,6 +405,18 @@ class mysql_db_ctrl:
 
             self.create_table(self.stock_dm_conn, tablename, tempsql)
 
+    def select_stock_dm_data(self, sql, tablename, selectcolname=None):
+        with self.stock_dm_conn.cursor() as cursor:
+            if selectcolname is None:
+                cursor.execute(sql.format(tablename))
+            else:
+                cursor.execute(sql.format(selectcolname, tablename))
+            dataresult = cursor.fetchall()
+
+            return dataresult
+
+    def insert_stock_dm_data(self, trdata):
+        pass
 
 if __name__ == '__main__':
     mysql_db_ctrl()
