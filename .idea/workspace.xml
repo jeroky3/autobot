@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="49d2a45b-66af-4aeb-9841-044c26004eee" name="Changes" comment="commonutil added&#10;collecting stock_daily table data...">
+    <list default="true" id="49d2a45b-66af-4aeb-9841-044c26004eee" name="Changes" comment="insert stock_daily table per one month&#10;volavg5 columns will be updated after inserting daily data.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/commonutil.py" beforeDir="false" afterPath="$PROJECT_DIR$/commonutil.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dbcollector.py" beforeDir="false" afterPath="$PROJECT_DIR$/dbcollector.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mysqldbctrl.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysqldbctrl.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +82,14 @@
       <option name="project" value="LOCAL" />
       <updated>1638423392209</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="insert stock_daily table per one month&#10;volavg5 columns will be updated after inserting daily data.">
+      <created>1638780608856</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1638780608856</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -102,17 +107,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="create table update_table_date&#10;update whether stock_info is done" />
     <MESSAGE value="commonutil added&#10;collecting stock_daily table data..." />
-    <option name="LAST_COMMIT_MESSAGE" value="commonutil added&#10;collecting stock_daily table data..." />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/dbcollector.py</url>
-          <line>592</line>
-          <option name="timeStamp" value="23" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="insert stock_daily table per one month&#10;volavg5 columns will be updated after inserting daily data." />
+    <option name="LAST_COMMIT_MESSAGE" value="insert stock_daily table per one month&#10;volavg5 columns will be updated after inserting daily data." />
   </component>
 </project>

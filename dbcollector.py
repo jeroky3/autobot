@@ -496,19 +496,20 @@ class DbCollector(QAxWidget):
         startdate = datetime.datetime.strptime(stockdaily_startdate, "%Y-%m-%d")
         twosortdates = [createdate, startdate]
         twosortdates.sort()
-        sql = 'SELECT {} FROM {} last order by stockdate'
+        sql = 'SELECT {} FROM {} last order by stockdate desc limit 1'
         #sql = 'SELECT IFNULL( (SELECT stockdate FROM stock_dm.a004840 last order by stockdate), '{}') as stockdate'
         dataresult = self.mysqldbctrl.select_stock_dm_data(sql, 'a' + code, 'stockdate')
         if len(dataresult) != 0:
-            #lastdbdate = datetime.datetime.strptime(dataresult[0], "%Y-%m-%d")
-            lastdbdate = dataresult[0]
+            #lastdbdate = datetime.datetime.strptime(dataresult[0]['stockdate'], "%Y-%m-%d")
+            lastdbdate = dataresult[0]['stockdate']
+            lastdbdate = datetime.datetime(lastdbdate.year, lastdbdate.month + 1, 1)
         else:
             lastdbdate = twosortdates[1]
 
         twosortdates.append(lastdbdate)
         twosortdates.sort()
         latestupdatedate = twosortdates[2]
-        print('stock_daily update start date : ', latestupdatedate)
+        print('stock_daily update : ', latestupdatedate, code)
 
 
         #updatestartdate = latestupdatedate + datetime.timedelta(days=28)
@@ -518,54 +519,65 @@ class DbCollector(QAxWidget):
         updatestartdate = latestupdatedate.replace(day=last_day_of_month)
 
         stockdailytrData = []
-        while todaydate > updatestartdate:
+
+        self.setinputvalue("종목코드", code)
+        #조회일자 = YYYYMMDD(20160101 연도4자리, 월2자리, 일2자리 형식)
+        self.setinputvalue("조회일자", updatestartdate.strftime("%Y%m%d"))
+        #표시구분 = 0:수량, 1: 금액(백만원)
+        self.setinputvalue("표시구분", "0")
+        lRet = self.commrqdata("opt10086req", "OPT10086", "0", OPT10086_SCRNO)
+        #        trData           stockdailytrData
+        #  20210121 ~ 20201222  20201230 ~ 20201202      22, 23, 24, 28, 29, 30 겹침
+        #      0       19          0           19
+        import operator
+        stockdailytrData = copy.deepcopy(self.trData)
+        lastdmdate = datetime.datetime.strptime(stockdailytrData[len(stockdailytrData)-1][0], "%Y%m%d")
+        if lastdmdate.month != updatestartdate.month:
+            pass
+        elif lastdmdate.day != 1:
+            updatestartdate = updatestartdate.replace(day=lastdmdate.day - 1)
+
             self.setinputvalue("종목코드", code)
-
-            #조회일자 = YYYYMMDD(20160101 연도4자리, 월2자리, 일2자리 형식)
+            # 조회일자 = YYYYMMDD(20160101 연도4자리, 월2자리, 일2자리 형식)
             self.setinputvalue("조회일자", updatestartdate.strftime("%Y%m%d"))
-
-            #표시구분 = 0:수량, 1: 금액(백만원)
+            # 표시구분 = 0:수량, 1: 금액(백만원)
             self.setinputvalue("표시구분", "0")
-
             lRet = self.commrqdata("opt10086req", "OPT10086", "0", OPT10086_SCRNO)
-            #        trData           stockdailytrData
-            #  20210121 ~ 20201222  20201230 ~ 20201202      22, 23, 24, 28, 29, 30 겹침
-            #      0       19          0           19
-            if len(stockdailytrData) == 0:
-                stockdailytrData = copy.deepcopy(self.trData)
-                lastdmdate = datetime.datetime.strptime(stockdailytrData[len(stockdailytrData)-1][0], "%Y%m%d")
-                if lastdmdate.day != 1:
-                    updatestartdate = updatestartdate.replace(day=lastdmdate.day-1)
-            else:
-                stockdailytrData = copy.deepcopy(self.trData) + stockdailytrData
 
-                # 중복 날짜 항들을 제거
-                counts = {}
-                insert_list = []
-                for i, elem in enumerate(stockdailytrData):
-                    # add 1 to counts for this string, creating new element at this key
-                    # with initial value of 0 if needed
-                    counts[elem[0]] = counts.get(elem[0], 0) + 1
-                    insert_list.append(counts[elem[0]] == 1)
+            stockdailytrData = copy.deepcopy(self.trData) + stockdailytrData
 
-                new_array = []
-                for i, elem in enumerate(stockdailytrData):
-                    # check that there's only 1 instance of this element.
-                    #if counts[elem[0]] == 1:
-                    #    new_array.append(elem)
-                    # add element from insert_list
-                    elemdate = datetime.datetime.strptime(elem[0], "%Y%m%d")
 
-                    # 해당 월이 아니면 삭제
-                    if insert_list[i] and updatestartdate.month == elemdate.month:
-                        new_array.append(elem)
+        # 중복 날짜 항들을 제거
+        counts = {}
+        insert_list = []
+        for i, elem in enumerate(stockdailytrData):
+            # add 1 to counts for this string, creating new element at this key
+            # with initial value of 0 if needed
+            counts[elem[0]] = counts.get(elem[0], 0) + 1
+            insert_list.append(counts[elem[0]] == 1)
 
-                stockdailytrData = new_array
+        new_array = []
+        for i, elem in enumerate(stockdailytrData):
+            # check that there's only 1 instance of this element.
+            #if counts[elem[0]] == 1:
+            #    new_array.append(elem)
+            # add element from insert_list
+            elemdate = datetime.datetime.strptime(elem[0], "%Y%m%d")
 
-                break
+            # 해당 월이 아니면 삭제
+            if insert_list[i] and updatestartdate.month == elemdate.month:
+                new_array.append(elem)
 
-        return stockdailytrData
+        stockdailytrData = new_array
+        stockdailytrData = sorted(stockdailytrData, key=operator.itemgetter(0))
 
+        moreupdateneeded = False
+        if todaydate.year != updatestartdate.year or todaydate.month != updatestartdate.month:
+            moreupdateneeded = True
+
+        return stockdailytrData, moreupdateneeded
+
+        """
         # 거래량 5, 20일 이동평균
         # 종가 5, 20, 60, 120일 이동평균
         voldata = getdata(7, self.trData)
@@ -577,7 +589,7 @@ class DbCollector(QAxWidget):
             d.append(getavg(i, 20, closedata))
             d.append(getavg(i, 60, closedata))
             d.append(getavg(i, 120, closedata))
-
+        """
 
     # 매일 3시 30분 장 종료 후 실행 권장.
     def update_stock_daily(self):
@@ -587,19 +599,22 @@ class DbCollector(QAxWidget):
 
                 self.mysqldbctrl.create_stock_daily_table(code)
 
-                # stock_daily 데이터 요청
-                data = self.getstockdaily(code, i)
+                moreupdateneeded = True
+                while moreupdateneeded:
 
-                newdata = [tuple(elem) for elem in data]
+                    # stock_daily 월별 데이터 요청
+                    data, moreupdateneeded = self.getstockdaily(code, i)
 
-                # database save
-                sql = f"INSERT INTO {'a' + code} (stockdate, open, high, low, close, profit, profitrate, volume, " \
-                      "volumemoney, creditrate, personalvol, investmentvol, foreignvol, foreignersvol, " \
-                      "program, foreignrate, foreignbuy, investmentbuy, personalbuy) VALUES "
-                sql = sql + ",".join("(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
-                                     for _ in newdata)
-                flattened_values = [item for elem in newdata for item in elem]
-                self.mysqldbctrl.insertstockdaily(sql, flattened_values)
+                    newdata = [tuple(elem) for elem in data]
+
+                    # database save
+                    sql = f"INSERT INTO {'a' + code} (stockdate, open, high, low, close, profit, profitrate, volume, " \
+                          "volumemoney, creditrate, personalvol, investmentvol, foreignvol, foreignersvol, " \
+                          "program, foreignrate, foreignbuy, investmentbuy, personalbuy) VALUES "
+                    sql = sql + ",".join("(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
+                                         for _ in newdata)
+                    flattened_values = [item for elem in newdata for item in elem]
+                    self.mysqldbctrl.insertstockdaily(sql, flattened_values)
 
 
 
