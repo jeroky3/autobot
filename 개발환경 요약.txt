@@ -1,0 +1,78 @@
+pyqt5
+pymysql
+pandas
+cryptography
+
+
+MySQL Database Server
+1. Create Database using pymysql
+2. Create Tables 
+3. Insert, Select, Delete, Update Row of a Table
+4. MySQL Data Type
+  문자열 n : 문자열개수
+     CHAR(255)
+     ---  VARCHAR(65535) (max = 16383); use BLOB or TEXT instead
+     TINYTEXT(255)
+     ---  TEXT(65535)
+     MEDIUMTEXT(16백만...)
+     LONGTEXT(42억...)
+     
+
+  숫자형
+      ---  TINYINT(1) -128 ~ +127, 0~255 
+      SMALLINT(2) -32,768 ~ 32,767 0~65535
+      MEDIUMINT(3)
+      ---  INT(4)
+      BIGINT(8)
+      ---  DECIMAL(m, n) - 고정타입
+      FLOAT(4)
+      -- DOUBLE(8)
+
+
+
+Open API 키움증권
+
+1. COM, C++ 콤포넌트 ActiveX 
+   Python 에서는 PyQt5 
+2. 요청과 이벤트를 받기
+3. Login 
+4. 주식종목정보
+5. 매수 매도 요청
+6. 체결정보 받기
+7. 기타 정보를 요청해서 받기
+
+SetInputValue
+CommRqData
+OnReceiveTrData
+OnReceiveMsg
+
+SendOrder
+OnReceiveChejanData
+OnReceiveMsg
+OnReceiveTrData
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    

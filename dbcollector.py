@@ -19,6 +19,7 @@ OPT10086_SCRNO = "1001"
 updateskipforstockinfo = True
 krxcollecting = True
 stockdaily_startdate = "2021-01-01"
+indexhistory_startdate = "2021-01-01"
 
 class DbCollector(QAxWidget):
     def __init__(self):

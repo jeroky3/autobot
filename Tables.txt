@@ -1,0 +1,56 @@
+﻿하나의 테이블에 너무 많은 열을 넣지 않는다. Row >= 50,000 느려집니다. -> 최적화
+테이블 1개당 10,000~20,000 Row 를 가질 수 있도록 설계.
+분당 주가 데이터 = 한종목당 1년치 100,000라인
+
+
+데이터베이스
+ - userinfo database (user 정보, 알고리즘, 백테스팅, ...)
+ - stock    database ( stock_info, stock_history, stock_report, index_history,
+                       news_info, oil, currency, livingrate)
+ - stock_dm database ( stock_daily, stock_min )
+
+테이블 설계
+1. stock_info : 코스피, 코스닥 종목 최신정보 업데이트
+    id, code, name, createdate, kospidaq, stocksize(대중소벤), thema(테마명), kind(업종)
+
+2. update_table_date : 테이블 업데이트 완료날짜 기록 
+   id stocktableid stock_info stock_history stock_report stock_daily stock_min index_history
+   news_info  oil currency livingrate
+   
+3. stock_daily : 수익률, 가격, 가격변화율, 거래량, 거래량 변화율
+   id, stockdate, profitrate, close, open, high, low, 
+   volume, volvag5, volvag20, 
+   closeavg5, closeavg20, closeavg60, closeavg120
+   종목별로 테이블 생성 
+
+4. index_history : 지수 기록
+   id, date, kospi, kosdaq, kospi200, nasdaq, S&P500, hongkong, china, japan, ...
+
+5. stock_report : 공시와 맞춰서 분기별로 월별로 업데이트
+    id, code, date, PER, ROE, PBR, 영업이익, 당기순이익
+
+6. oil : 석유 가격
+   id, date, brent, gas, wti
+
+7. currency 환율
+   달러, 엔화, 유로, 위안화
+
+8. livingreate : 물가
+   전세계 인플레이션 물가 지수 livingrate
+
+9. stock_history : 공시 데이터 krx 참고
+    id, code, issuedate, issuetitle, issuecontents
+    (ex : delisting(상장폐지), 투자경고 등등 종목공시)
+
+10. news_info : 뉴스정보
+   실시간 뉴스 정보 Catch => 빅데이터 => 주식 예측
+   keyword 
+       id, datetime, keyword, kinds, types, bins
+   news_anal
+       id, newsid, newsdate, media, writer, title, kind1, kind2, kind3, accidentkind1, accidentkind2, accidentkind3, people, place, stocknames, keyword, featureweight, contentdetail, url, noanalysis 
+
+11. stock_min : 분당 수익률, 가격, 가격변화율, 거래량, 거래량 변화율
+   stock_daily date -> datetime
+   종목별로 테이블...   
+
+   
