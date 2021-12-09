@@ -23,8 +23,20 @@
    closeavg5, closeavg20, closeavg60, closeavg120
    종목별로 테이블 생성 
 
-4. index_history : 지수 기록
-   id, date, kospi, kosdaq, kospi200, nasdaq, S&P500, hongkong, china, japan, ...
+4. index_history : 종합 지수 기록
+   id, date, kospi, kosdaq, kospi200, dow, nasdaq, S&P500, hongkong, china, japan, ...
+   각 지수별 데이터 기록 테이블
+   id, date, high, low, close, vol, adjclose
+   index_kospi,
+   index_kosdaq,
+   index_kospi200,
+   index_dow,
+   index_nasdaq,
+   index_snp500,
+   index_hkse,
+   index_shanghai,
+   index_tokyo,
+   index_eurostoxx
 
 5. stock_report : 공시와 맞춰서 분기별로 월별로 업데이트
     id, code, date, PER, ROE, PBR, 영업이익, 당기순이익

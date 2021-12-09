@@ -5,7 +5,7 @@ from PyQt5.QAxContainer import *
 from PyQt5.QtCore import *
 import pymysql
 import pandas as pd
-
+from sqlalchemy import create_engine
 
 mysql_db_id = 'autobot'
 mysql_db_password = 'autobot'
@@ -32,6 +32,9 @@ class mysql_db_ctrl:
         self.stock_dm_conn = pymysql.connect(user=mysql_db_id, password=mysql_db_password, host=mysql_db_ip,
                                       port=int(mysql_db_port), charset='utf8mb4', database='stock_dm',
                                       cursorclass=pymysql.cursors.DictCursor)
+
+        self.stock_conn_sqlalchemy = create_engine('mysql+pymysql://' + mysql_db_id + ':' + mysql_db_password + '@' +
+                                                   mysql_db_ip + '/' + 'stock')
 
         self.create_tables_all()
 
@@ -214,6 +217,21 @@ class mysql_db_ctrl:
                       ') '
             self.create_table(self.stock_conn, 'index_history', tempsql)
 
+        indextables = ['index_kospi', 'index_kosdaq', 'index_kospi200', 'index_dow', 'index_nasdaq', 'index_snp500',
+                       'index_hkse', 'index_shanghai', 'index_tokyo', 'index_eurostoxx']
+        for t in indextables:
+            if not self.tableexists(t):
+                tempsql = 'CREATE TABLE {} (' \
+                          'id int AUTO_INCREMENT PRIMARY KEY,' \
+                          'date date, ' \
+                          'high DECIMAL(8,2), ' \
+                          'low DECIMAL(8,2), ' \
+                          'close DECIMAL(8,2), ' \
+                          'volume DECIMAL(10,2), '  \
+                          'adjclose DECIMAL(8,2) ' \
+                          ') '
+                self.create_table(self.stock_conn, t, tempsql)
+
         # news_info_keyword
         # id, datetime, keyword, kinds, types, bins
         if not self.tableexists('news_info_keyword'):
@@ -343,18 +361,23 @@ class mysql_db_ctrl:
             self.stock_dm_conn.commit()
 
 
-    def checktablehasthecolumn(self, tablename, colname, coldata):
+    def checktablehasthecolumn(self, tablename, colname, coldata=None):
         exists = False
         """ select row  """
-        sql = "SELECT {} FROM {} where {} = %s "
+        sql = "SELECT {} FROM {} "
+        if coldata is not None:
+            sql = sql + " where {} = %s "
         with self.stock_conn.cursor() as cursor:
-            cursor.execute(sql.format(colname, tablename, colname), (coldata))
+            if coldata is not None:
+                cursor.execute(sql.format(colname, tablename, colname), (coldata))
+            else:
+                cursor.execute(sql.format(colname, tablename))
             dataresult = cursor.fetchall()
             if dataresult is None or len(dataresult) == 0:
                 exists = False
             else:
                 exists = True
-            self.stock_conn.commit()
+            #self.stock_conn.commit()
 
         return exists
 
@@ -405,6 +428,13 @@ class mysql_db_ctrl:
 
             self.create_table(self.stock_dm_conn, tablename, tempsql)
 
+    def select_stock_info(self, sql, tablename=None, colname=None):
+        with self.stock_conn.cursor() as cursor:
+            cursor.execute(sql)
+            dataresult = cursor.fetchall()
+            return dataresult
+
+
     def select_stock_dm_data(self, sql, tablename, selectcolname=None):
         with self.stock_dm_conn.cursor() as cursor:
             if selectcolname is None:
@@ -417,6 +447,12 @@ class mysql_db_ctrl:
 
     def insert_stock_dm_data(self, trdata):
         pass
+
+    def update_stock_dm_data(self, sql):
+        with self.stock_dm_conn.cursor() as cursor:
+            cursor.execute(sql)
+            self.stock_dm_conn.commit()
+
 
 if __name__ == '__main__':
     mysql_db_ctrl()

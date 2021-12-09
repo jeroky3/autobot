@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="49d2a45b-66af-4aeb-9841-044c26004eee" name="Changes" comment="update stock_daily per one month and one code">
+    <list default="true" id="49d2a45b-66af-4aeb-9841-044c26004eee" name="Changes" comment="document update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tables.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Tables.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dbcollector.py" beforeDir="false" afterPath="$PROJECT_DIR$/dbcollector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mysqldbctrl.py" beforeDir="false" afterPath="$PROJECT_DIR$/mysqldbctrl.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +98,14 @@
       <option name="project" value="LOCAL" />
       <updated>1638864438625</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="document update">
+      <created>1638928016601</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1638928016601</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -116,6 +125,18 @@
     <MESSAGE value="commonutil added&#10;collecting stock_daily table data..." />
     <MESSAGE value="insert stock_daily table per one month&#10;volavg5 columns will be updated after inserting daily data." />
     <MESSAGE value="update stock_daily per one month and one code" />
-    <option name="LAST_COMMIT_MESSAGE" value="update stock_daily per one month and one code" />
+    <MESSAGE value="document update" />
+    <option name="LAST_COMMIT_MESSAGE" value="document update" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dbcollector.py</url>
+          <line>654</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

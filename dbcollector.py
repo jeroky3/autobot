@@ -4,12 +4,15 @@ import datetime
 import decimal
 import time
 import numpy as np
+import sqlalchemy.types
 
 from PyQt5.QAxContainer import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 import pymysql
 import pandas as pd
+from pandas_datareader import data
+
 from mysqldbctrl import *
 from commonutil import *
 
@@ -18,8 +21,11 @@ OPT10086_SCRNO = "1001"
 
 updateskipforstockinfo = True
 krxcollecting = True
+updatestockdaily = False
+updateindexhistory = True
 stockdaily_startdate = "2021-01-01"
 indexhistory_startdate = "2021-01-01"
+
 
 class DbCollector(QAxWidget):
     def __init__(self):
@@ -42,13 +48,14 @@ class DbCollector(QAxWidget):
         self.treventloop = QEventLoop()
         self.chejaneventloop = QEventLoop()
 
-        #self.apitest()
-        #self.buystock("005930", 1)
-        #self.sellstock("005930", 1)
+        # self.apitest()
+        # self.buystock("005930", 1)
+        # self.sellstock("005930", 1)
 
         self.mysqldbctrl = mysql_db_ctrl()
         self.update_stock_info()
         self.update_stock_daily()
+        self.update_index_history()
 
     def eventConnect(self, nErrCode):
         if nErrCode == 0:
@@ -64,14 +71,14 @@ class DbCollector(QAxWidget):
     def receiveMsg(self, sScrNo, sRQName, sTrCode, sMsg):
         print('receiveMsg', sScrNo, sRQName, sTrCode, sMsg)
 
-    def setinputvalue(self, sID,    # // TR에 명시된 Input이름
-                            sValue):  # // Input이름으로 지정한 값
+    def setinputvalue(self, sID,  # // TR에 명시된 Input이름
+                      sValue):  # // Input이름으로 지정한 값
         self.dynamicCall("SetInputValue(QString, QString)", sID, sValue)
 
-    def commrqdata(self,  sRQName, #   // 사용자 구분명 (임의로 지정, 한글지원)
-          sTrCode,   # // 조회하려는 TR이름
-          nPrevNext, # // 연속조회여부
-          sScreenNo ): #  // 화면번호 (4자리 숫자 임의로 지정)
+    def commrqdata(self, sRQName,  # // 사용자 구분명 (임의로 지정, 한글지원)
+                   sTrCode,  # // 조회하려는 TR이름
+                   nPrevNext,  # // 연속조회여부
+                   sScreenNo):  # // 화면번호 (4자리 숫자 임의로 지정)
         time.sleep(2)
         self.dynamicCall("CommRqData(QString, QString, int, QString)", sRQName, sTrCode, nPrevNext, sScreenNo)
         self.rqcount += 1
@@ -79,23 +86,23 @@ class DbCollector(QAxWidget):
         self.treventloop = QEventLoop()
         self.treventloop.exec_()
 
-    def receiveTrData(self, sScrNo, #  // 화면번호
-          sRQName,      #// 사용자 구분명
-          sTrCode,      #// TR이름
-          sRecordName,  #// 레코드 이름
-          sPrevNext,    #// 연속조회 유무를 판단하는 값 0: 연속(추가조회)데이터 없음, 2:연속(추가조회) 데이터 있음
-          nDataLength,  #// 사용안함.
-          sErrorCode,   #// 사용안함.
-          sMessage,     #// 사용안함.
-          sSplmMsg):     #// 사용안함
-        #print('receiveTrData ', sScrNo, sRQName, sTrCode, sRecordName, sPrevNext)
+    def receiveTrData(self, sScrNo,  # // 화면번호
+                      sRQName,  # // 사용자 구분명
+                      sTrCode,  # // TR이름
+                      sRecordName,  # // 레코드 이름
+                      sPrevNext,  # // 연속조회 유무를 판단하는 값 0: 연속(추가조회)데이터 없음, 2:연속(추가조회) 데이터 있음
+                      nDataLength,  # // 사용안함.
+                      sErrorCode,  # // 사용안함.
+                      sMessage,  # // 사용안함.
+                      sSplmMsg):  # // 사용안함
+        # print('receiveTrData ', sScrNo, sRQName, sTrCode, sRecordName, sPrevNext)
 
         try:
             nCnt = self.dynamicCall("GetRepeatCnt(QString, QString)", sTrCode, sRQName)
 
             self.trData = []
             if sRQName == 'opt10001req':
-                #for nIdx in range(0, nCnt):
+                # for nIdx in range(0, nCnt):
                 val = self.getopt10001reqdata(sTrCode, sRQName, nCnt, "종목코드")
                 self.trData.append(val)
                 val = self.getopt10001reqdata(sTrCode, sRQName, nCnt, "종목명")
@@ -164,8 +171,8 @@ class DbCollector(QAxWidget):
                     temptrdata.append(remove_double_sign(val) if val != '' else 0)
                     val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "프로그램")
                     temptrdata.append(remove_double_sign(val) if val != '' else 0)
-                    #val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "외인비") 외인보유와 같다.
-                    #temptrdata.append(decimal.Decimal(val) if val != '' else decimal.Decimal(0))
+                    # val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "외인비") 외인보유와 같다.
+                    # temptrdata.append(decimal.Decimal(val) if val != '' else decimal.Decimal(0))
                     val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "외인보유")
                     temptrdata.append(decimal.Decimal(val) if val != '' else decimal.Decimal(0))
                     val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "외인순매수")
@@ -174,8 +181,8 @@ class DbCollector(QAxWidget):
                     temptrdata.append(remove_double_sign(val) if val != '' else 0)
                     val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "개인순매수")
                     temptrdata.append(remove_double_sign(val) if val != '' else 0)
-                    #val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "신용잔고율")  신용비와 같다.
-                    #temptrdata.append(decimal.Decimal(val) if val != '' else decimal.Decimal(0))
+                    # val = self.getopt10001reqdata(sTrCode, sRQName, nIdx, "신용잔고율")  신용비와 같다.
+                    # temptrdata.append(decimal.Decimal(val) if val != '' else decimal.Decimal(0))
                     self.trData.append(temptrdata)
         except TypeError as e:
             print('error receiveTrData', e)
@@ -187,9 +194,9 @@ class DbCollector(QAxWidget):
         return val.strip()
 
     def receiveChejanData(self,
-            sGubun, #// 체결구분. 접수와 체결시 '0'값, 국내주식 잔고변경은 '1'값, 파생잔고변경은 '4'
-            nItemCnt,
-            sFIdList):
+                          sGubun,  # // 체결구분. 접수와 체결시 '0'값, 국내주식 잔고변경은 '1'값, 파생잔고변경은 '4'
+                          nItemCnt,
+                          sFIdList):
         print('receiveChejanData {} {} {}'.format(sGubun, nItemCnt, sFIdList))
 
         stockcode = self.dynamicCall("GetChejanData(int)", 9001)
@@ -211,7 +218,6 @@ class DbCollector(QAxWidget):
         self.setinputvalue("기준일자", "20160101")
         self.setinputvalue("수정주가구분", "1")
         lRet = self.commrqdata("RQName", "OPT10081", "0", "0600")
-
 
     """
     [주문처리단계]
@@ -238,15 +244,15 @@ class DbCollector(QAxWidget):
     """
 
     def sendorder(self,
-          sRQName, #// 사용자 구분명
-          sScreenNo, #// 화면번호
-          sAccNo,  #// 계좌번호 10자리
-          nOrderType,  #// 주문유형 1:신규매수, 2:신규매도 3:매수취소, 4:매도취소, 5:매수정정, 6:매도정정
-          sCode, #// 종목코드 (6자리)
-          nQty,  #// 주문수량
-          nPrice, #// 주문가격
-          sHogaGb,  # // 거래구분(혹은 호가구분)은 아래 참고
-          sOrgOrderNo): # // 원주문번호. 신규주문에는 공백 입력, 정정/취소시 입력합니다.
+                  sRQName,  # // 사용자 구분명
+                  sScreenNo,  # // 화면번호
+                  sAccNo,  # // 계좌번호 10자리
+                  nOrderType,  # // 주문유형 1:신규매수, 2:신규매도 3:매수취소, 4:매도취소, 5:매수정정, 6:매도정정
+                  sCode,  # // 종목코드 (6자리)
+                  nQty,  # // 주문수량
+                  nPrice,  # // 주문가격
+                  sHogaGb,  # // 거래구분(혹은 호가구분)은 아래 참고
+                  sOrgOrderNo):  # // 원주문번호. 신규주문에는 공백 입력, 정정/취소시 입력합니다.
 
         self.dynamicCall("SendOrder(Qstring, QString, QString, int, QString, int, int, QString, QString)",
                          [sRQName, sScreenNo, sAccNo, nOrderType, sCode, nQty, nPrice, sHogaGb, sOrgOrderNo])
@@ -264,9 +270,9 @@ class DbCollector(QAxWidget):
     receiveChejanData 1 34 9201;9001;917;916;302;10;930;931;932;933;945;946;950;951;27;28;307;8019;957;958;918;990;991;992;993;959;924;10010;25;11;12;306;305;970
     체결가 = 
     """
+
     def buystock(self, code, qty):
         self.sendorder("sendorder_req", "1001", "8008681611", 1, code, qty, 0, "03", "")
-
 
     """
     receiveMsg 1001 sendorder_req KOA_NORMAL_SELL_KP_ORD [100000] 모의투자 매도주문완료
@@ -284,17 +290,18 @@ class DbCollector(QAxWidget):
     미체결수량 = 
     체결가 = 
     """
+
     def sellstock(self, code, qty):
         self.sendorder("sendorder_req", "1001", "8008681611", 2, code, qty, 0, "03", "")
 
     def getstockinfo(self, code):
-        #[opt10001: 주식기본정보요청]
+        # [opt10001: 주식기본정보요청]
         self.setinputvalue("종목코드", code)
         lRet = self.commrqdata("opt10001req", "OPT10001", "0", OPT10001_SCRNO)
-        #print(self.trData)
+        # print(self.trData)
 
     def update_stock_info_from_krx(self):
-        #krx 사이트에서 가져오는 게 더 정확하다.
+        # krx 사이트에서 가져오는 게 더 정확하다.
         markettypes = ['stockMkt', 'kosdaqMkt', 'konexMkt']
         marketkind = ['kospi', 'kosdaq', 'konex']
         for i, market in enumerate(markettypes):
@@ -303,7 +310,7 @@ class DbCollector(QAxWidget):
                 header=0)[0])
             self.stockdf[i].종목코드 = self.stockdf[i].종목코드.map('{:06d}'.format)
             self.stockdf[i] = self.stockdf[i].rename(
-                columns={'회사명': 'codename', '종목코드': 'code', '업종':'kind',
+                columns={'회사명': 'codename', '종목코드': 'code', '업종': 'kind',
                          '주요제품': 'majorproduct', '상장일': 'createdate', '대표자명': 'ceo', '지역': 'home'})
 
             self.strcodelist.append(self.stockdf[i].code)
@@ -325,7 +332,7 @@ class DbCollector(QAxWidget):
                 if type(stockseries.majorproduct[idx]) == str:
                     majorproduct = stockseries.majorproduct[idx]
                 else:
-                    #pd.isna(stockseries.majorproduct[idx]) or np.isnan(stockseries.majorproduct[idx]):
+                    # pd.isna(stockseries.majorproduct[idx]) or np.isnan(stockseries.majorproduct[idx]):
                     majorproduct = None
 
                 ceo = stockseries.ceo[idx]
@@ -468,11 +475,11 @@ class DbCollector(QAxWidget):
             self.mysqldbctrl.insertstockinfo(sql, tuple(data))
     """
 
-
     def update_stock_info(self):
         if updateskipforstockinfo is False:
             # check table date
-            if self.mysqldbctrl.checktablehasthecolumn('update_table_date', 'stock_info', datetime.datetime.now().date()):
+            if self.mysqldbctrl.checktablehasthecolumn('update_table_date', 'stock_info',
+                                                       datetime.datetime.now().date()):
                 return
 
             # clear Table
@@ -481,12 +488,12 @@ class DbCollector(QAxWidget):
         # 종목 정보 갱신
         if krxcollecting is True:
             self.update_stock_info_from_krx()
-        #else:
+        # else:
         #    self.update_stock_info_from_openapi()
 
         self.mysqldbctrl.update_date_table_done('stock_info')
 
-    #[opt10086: 일별주가요청] 20일치 데이터를 가져옴.
+    # [opt10086: 일별주가요청] 20일치 데이터를 가져옴.
     # 상장일, 시작날짜, 저장되어 있지 않은 날짜 중 가장 최근 날짜를 기준으로 월별 데이터를 가져온다.
     # 시작일 : 20210101 result : 20210104~20210129
     def getstockdaily(self, code, kospidaqnex=0):
@@ -495,25 +502,24 @@ class DbCollector(QAxWidget):
         idx = stockseries.index[0]
         createdate = datetime.datetime.strptime(stockseries.createdate[idx], "%Y-%m-%d")
         startdate = datetime.datetime.strptime(stockdaily_startdate, "%Y-%m-%d")
-        twosortdates = [createdate, startdate]
-        twosortdates.sort()
+        dateslistforupdate = [createdate, startdate]
+        dateslistforupdate.sort()
         sql = 'SELECT {} FROM {} last order by stockdate desc limit 1'
-        #sql = 'SELECT IFNULL( (SELECT stockdate FROM stock_dm.a004840 last order by stockdate), '{}') as stockdate'
+        # sql = 'SELECT IFNULL( (SELECT stockdate FROM stock_dm.a004840 last order by stockdate), '{}') as stockdate'
         dataresult = self.mysqldbctrl.select_stock_dm_data(sql, 'a' + code, 'stockdate')
-        if len(dataresult) != 0:
-            #lastdbdate = datetime.datetime.strptime(dataresult[0]['stockdate'], "%Y-%m-%d")
-            lastdbdate = dataresult[0]['stockdate']
-            lastdbdate = datetime.datetime(lastdbdate.year, lastdbdate.month + 1, 1)
-        else:
-            lastdbdate = twosortdates[1]
+        lastdbdate = dateslistforupdate[1]
 
-        twosortdates.append(lastdbdate)
-        twosortdates.sort()
-        latestupdatedate = twosortdates[2]
+        if len(dataresult) != 0:
+            # lastdbdate = datetime.datetime.strptime(dataresult[0]['stockdate'], "%Y-%m-%d")
+            lastdbdate = dataresult[0]['stockdate']
+            dbdatetoupdate = datetime.datetime(lastdbdate.year, lastdbdate.month + 1, 1)
+            dateslistforupdate.append(dbdatetoupdate)
+
+        dateslistforupdate.sort()
+        latestupdatedate = dateslistforupdate[len(dateslistforupdate) - 1]
         print('stock_daily update : ', latestupdatedate, code)
 
-
-        #updatestartdate = latestupdatedate + datetime.timedelta(days=28)
+        # updatestartdate = latestupdatedate + datetime.timedelta(days=28)
         todaydate = datetime.datetime.today()
         import calendar
         last_day_of_month = calendar.monthrange(latestupdatedate.year, latestupdatedate.month)[1]
@@ -522,9 +528,9 @@ class DbCollector(QAxWidget):
         stockdailytrData = []
 
         self.setinputvalue("종목코드", code)
-        #조회일자 = YYYYMMDD(20160101 연도4자리, 월2자리, 일2자리 형식)
+        # 조회일자 = YYYYMMDD(20160101 연도4자리, 월2자리, 일2자리 형식)
         self.setinputvalue("조회일자", updatestartdate.strftime("%Y%m%d"))
-        #표시구분 = 0:수량, 1: 금액(백만원)
+        # 표시구분 = 0:수량, 1: 금액(백만원)
         self.setinputvalue("표시구분", "0")
         lRet = self.commrqdata("opt10086req", "OPT10086", "0", OPT10086_SCRNO)
         #        trData           stockdailytrData
@@ -532,7 +538,7 @@ class DbCollector(QAxWidget):
         #      0       19          0           19
         import operator
         stockdailytrData = copy.deepcopy(self.trData)
-        lastdmdate = datetime.datetime.strptime(stockdailytrData[len(stockdailytrData)-1][0], "%Y%m%d")
+        lastdmdate = datetime.datetime.strptime(stockdailytrData[len(stockdailytrData) - 1][0], "%Y%m%d")
         if lastdmdate.month != updatestartdate.month:
             pass
         elif lastdmdate.day != 1:
@@ -547,7 +553,6 @@ class DbCollector(QAxWidget):
 
             stockdailytrData = copy.deepcopy(self.trData) + stockdailytrData
 
-
         # 중복 날짜 항들을 제거
         counts = {}
         insert_list = []
@@ -560,13 +565,13 @@ class DbCollector(QAxWidget):
         new_array = []
         for i, elem in enumerate(stockdailytrData):
             # check that there's only 1 instance of this element.
-            #if counts[elem[0]] == 1:
+            # if counts[elem[0]] == 1:
             #    new_array.append(elem)
             # add element from insert_list
             elemdate = datetime.datetime.strptime(elem[0], "%Y%m%d")
 
-            # 해당 월이 아니면 삭제
-            if insert_list[i] and updatestartdate.month == elemdate.month:
+            # 해당 월이 아니면 삭제, DB 에 저장되어 있는 날짜보다 과거이면 삭제.
+            if insert_list[i] and updatestartdate.month == elemdate.month and elemdate > lastdbdate:
                 new_array.append(elem)
 
         stockdailytrData = new_array
@@ -578,31 +583,19 @@ class DbCollector(QAxWidget):
 
         return stockdailytrData, moreupdateneeded
 
-        """
-        # 거래량 5, 20일 이동평균
-        # 종가 5, 20, 60, 120일 이동평균
-        voldata = getdata(7, self.trData)
-        closedata = getdata(4, self.trData)
-        for i, d in enumerate(self.trData):
-            d.append(getavg(i, 5, voldata))
-            d.append(getavg(i, 20, voldata))
-            d.append(getavg(i, 5, closedata))
-            d.append(getavg(i, 20, closedata))
-            d.append(getavg(i, 60, closedata))
-            d.append(getavg(i, 120, closedata))
-        """
-
     # 매일 3시 30분 장 종료 후 실행 권장.
     def update_stock_daily(self):
+        if updatestockdaily is False:
+            return
 
         for i in range(0, 3):
+
             for code in self.strcodelist[i]:
 
                 self.mysqldbctrl.create_stock_daily_table(code)
 
                 moreupdateneeded = True
                 while moreupdateneeded:
-
                     # stock_daily 월별 데이터 요청
                     data, moreupdateneeded = self.getstockdaily(code, i)
 
@@ -616,6 +609,68 @@ class DbCollector(QAxWidget):
                                          for _ in newdata)
                     flattened_values = [item for elem in newdata for item in elem]
                     self.mysqldbctrl.insertstockdaily(sql, flattened_values)
+
+                """ 종목의 이동평균 업데이트
+                # 거래량 5, 20일 이동평균
+                # 종가 5, 20, 60, 120일 이동평균
+                수동 계산 select sum(ABS(close)), sum(ABS(close)) / 5 from a001250 where stockdate >= '2021-01-07' and stockdate <= '2021-01-13'
+                자동 SQL 문 
+                """
+                sql = "update a001250 tb1 " \
+                      "inner join " \
+                      "( " \
+                      "SELECT " \
+                      "       a.stockdate, " \
+                      "       ABS(a.close), " \
+                      "       Round( ( SELECT SUM(ABS(b.close)) / COUNT(ABS(b.close)) " \
+                      "                FROM a001250 AS b " \
+                      "                WHERE a.id-b.id BETWEEN 0 AND 4 " \
+                      "              ), 2 ) AS 'daysMovingAvg' " \
+                      "     FROM a001250 AS a " \
+                      "     ORDER BY a.stockdate " \
+                      ") x on tb1.stockdate = x.stockdate " \
+                      "set tb1.closeavg5 = x.daysMovingAvg"
+
+                self.mysqldbctrl.update_stock_dm_data(sql)
+
+    # kospi, kosdaq
+    # High, Low, Open, Close, Volume, AdjClose
+    # yahoo.
+    def update_index_history(self):
+
+        if updateindexhistory is False:
+            return
+
+        start_date = datetime.datetime.strptime(indexhistory_startdate, "%Y-%m-%d")
+        end_date = datetime.datetime.today() + datetime.timedelta(days=-1)
+
+        # start_date = db last date + 1
+        #dataresult = self.mysqldbctrl.select_stock_info("select date from index_kospi order by date desc limit 1")
+        #if len(dataresult) != 0:
+        #    start_date = dataresult[0] + datetime.timedelta(days=1)
+
+        # kospi
+        df = data.get_data_yahoo("^KS11", start_date, end_date)
+        df.columns = ['high', 'low', 'open', 'close', 'volume', 'adjclose']
+        df.high = df.high.round(2)
+        df.low = df.low.round(2)
+        df.open = df.open.round(2)
+        df.close = df.close.round(2)
+        df.adjclose = df.adjclose.round(2)
+
+        # print(df)
+        # Date           High          Low  ...       Volume    Adj Close                                          ...
+        # 2021-01-04  2946.540039  2869.110107  ...  1026500  2944.449951
+        df.to_sql("index_kospi", self.mysqldbctrl.stock_conn_sqlalchemy, if_exists='replace', index=True,
+                  dtype={
+                      "high": sqlalchemy.types.Numeric(precision=8,scale=2),
+                      "low": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "open": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "close": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "adjclose": sqlalchemy.types.Numeric(precision=8, scale=2)
+                  }
+        )
+
 
 
 
