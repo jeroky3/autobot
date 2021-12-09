@@ -10,20 +10,20 @@
  - stock_dm database ( stock_daily, stock_min )
 
 테이블 설계
-1. stock_info : 코스피, 코스닥 종목 최신정보 업데이트
+1. stock_info[stock] : 코스피, 코스닥 종목 최신정보 업데이트
     id, code, name, createdate, kospidaq, stocksize(대중소벤), thema(테마명), kind(업종)
 
-2. update_table_date : 테이블 업데이트 완료날짜 기록 
+2. update_table_date[stock] : 테이블 업데이트 완료날짜 기록
    id stocktableid stock_info stock_history stock_report stock_daily stock_min index_history
    news_info  oil currency livingrate
    
-3. stock_daily : 수익률, 가격, 가격변화율, 거래량, 거래량 변화율
+3. stock_daily[stock_dm] : 수익률, 가격, 가격변화율, 거래량, 거래량 변화율
    id, stockdate, profitrate, close, open, high, low, 
    volume, volvag5, volvag20, 
    closeavg5, closeavg20, closeavg60, closeavg120
    종목별로 테이블 생성 
 
-4. index_history : 종합 지수 기록
+4. index_history[stock] : 종합 지수 기록
    id, date, kospi, kosdaq, kospi200, dow, nasdaq, S&P500, hongkong, china, japan, ...
    각 지수별 데이터 기록 테이블
    id, date, high, low, close, vol, adjclose
