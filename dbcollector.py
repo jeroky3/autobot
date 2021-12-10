@@ -644,12 +644,9 @@ class DbCollector(QAxWidget):
         start_date = datetime.datetime.strptime(indexhistory_startdate, "%Y-%m-%d")
         end_date = datetime.datetime.today() + datetime.timedelta(days=-1)
 
-        # start_date = db last date + 1
-        #dataresult = self.mysqldbctrl.select_stock_info("select date from index_kospi order by date desc limit 1")
-        #if len(dataresult) != 0:
-        #    start_date = dataresult[0] + datetime.timedelta(days=1)
-
         # kospi
+        # Date           High          Low  ...       Volume    Adj Close                                          ...
+        # 2021-01-04  2946.540039  2869.110107  ...  1026500  2944.449951
         df = data.get_data_yahoo("^KS11", start_date, end_date)
         df.columns = ['high', 'low', 'open', 'close', 'volume', 'adjclose']
         df.high = df.high.round(2)
@@ -657,10 +654,6 @@ class DbCollector(QAxWidget):
         df.open = df.open.round(2)
         df.close = df.close.round(2)
         df.adjclose = df.adjclose.round(2)
-
-        # print(df)
-        # Date           High          Low  ...       Volume    Adj Close                                          ...
-        # 2021-01-04  2946.540039  2869.110107  ...  1026500  2944.449951
         df.to_sql("index_kospi", self.mysqldbctrl.stock_conn_sqlalchemy, if_exists='replace', index=True,
                   dtype={
                       "high": sqlalchemy.types.Numeric(precision=8,scale=2),
@@ -671,8 +664,239 @@ class DbCollector(QAxWidget):
                   }
         )
 
+        # kosdaq
+        df = data.get_data_yahoo("^KQ11", start_date, end_date)
+        df.columns = ['high', 'low', 'open', 'close', 'volume', 'adjclose']
+        df.high = df.high.round(2)
+        df.low = df.low.round(2)
+        df.open = df.open.round(2)
+        df.close = df.close.round(2)
+        df.adjclose = df.adjclose.round(2)
+        df.to_sql("index_kosdaq", self.mysqldbctrl.stock_conn_sqlalchemy, if_exists='replace', index=True,
+                  dtype={
+                      "high": sqlalchemy.types.Numeric(precision=8,scale=2),
+                      "low": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "open": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "close": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "adjclose": sqlalchemy.types.Numeric(precision=8, scale=2)
+                  }
+        )
+
+        """
+        # kospi200
+        df = data.get_data_yahoo("^KS200", start_date, end_date)
+        df.columns = ['high', 'low', 'open', 'close', 'volume', 'adjclose']
+        df.high = df.high.round(2)
+        df.low = df.low.round(2)
+        df.open = df.open.round(2)
+        df.close = df.close.round(2)
+        df.adjclose = df.adjclose.round(2)
+        df.to_sql("index_kospi200", self.mysqldbctrl.stock_conn_sqlalchemy, if_exists='replace', index=True,
+                  dtype={
+                      "high": sqlalchemy.types.Numeric(precision=8,scale=2),
+                      "low": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "open": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "close": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "adjclose": sqlalchemy.types.Numeric(precision=8, scale=2)
+                  }
+        )
+        """
+
+        # dow
+        df = data.get_data_yahoo("^DJI", start_date, end_date)
+        df.columns = ['high', 'low', 'open', 'close', 'volume', 'adjclose']
+        df.high = df.high.round(2)
+        df.low = df.low.round(2)
+        df.open = df.open.round(2)
+        df.close = df.close.round(2)
+        df.adjclose = df.adjclose.round(2)
+
+        df.to_sql("index_dow", self.mysqldbctrl.stock_conn_sqlalchemy, if_exists='replace', index=True,
+                  dtype={
+                      "high": sqlalchemy.types.Numeric(precision=8,scale=2),
+                      "low": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "open": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "close": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "adjclose": sqlalchemy.types.Numeric(precision=8, scale=2)
+                  }
+        )
+
+        # nasdaq
+        # Date           High          Low  ...       Volume    Adj Close                                          ...
+        # 2021-01-04  2946.540039  2869.110107  ...  1026500  2944.449951
+        df = data.get_data_yahoo("^IXIC", start_date, end_date)
+        df.columns = ['high', 'low', 'open', 'close', 'volume', 'adjclose']
+        df.high = df.high.round(2)
+        df.low = df.low.round(2)
+        df.open = df.open.round(2)
+        df.close = df.close.round(2)
+        df.adjclose = df.adjclose.round(2)
+
+        df.to_sql("index_nasdaq", self.mysqldbctrl.stock_conn_sqlalchemy, if_exists='replace', index=True,
+                  dtype={
+                      "high": sqlalchemy.types.Numeric(precision=8,scale=2),
+                      "low": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "open": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "close": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "adjclose": sqlalchemy.types.Numeric(precision=8, scale=2)
+                  }
+        )
+
+        # S&P500
+        # Date           High          Low  ...       Volume    Adj Close                                          ...
+        # 2021-01-04  2946.540039  2869.110107  ...  1026500  2944.449951
+        df = data.get_data_yahoo("^GSPC", start_date, end_date)
+        df.columns = ['high', 'low', 'open', 'close', 'volume', 'adjclose']
+        df.high = df.high.round(2)
+        df.low = df.low.round(2)
+        df.open = df.open.round(2)
+        df.close = df.close.round(2)
+        df.adjclose = df.adjclose.round(2)
+
+        df.to_sql("index_snp500", self.mysqldbctrl.stock_conn_sqlalchemy, if_exists='replace', index=True,
+                  dtype={
+                      "high": sqlalchemy.types.Numeric(precision=8,scale=2),
+                      "low": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "open": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "close": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "adjclose": sqlalchemy.types.Numeric(precision=8, scale=2)
+                  }
+        )
+
+        # HONGKONG hang seng Index
+        # Date           High          Low  ...       Volume    Adj Close                                          ...
+        # 2021-01-04  2946.540039  2869.110107  ...  1026500  2944.449951
+        df = data.get_data_yahoo("^HSI", start_date, end_date)
+        df.columns = ['high', 'low', 'open', 'close', 'volume', 'adjclose']
+        df.high = df.high.round(2)
+        df.low = df.low.round(2)
+        df.open = df.open.round(2)
+        df.close = df.close.round(2)
+        df.adjclose = df.adjclose.round(2)
+
+        df.to_sql("index_hkse", self.mysqldbctrl.stock_conn_sqlalchemy, if_exists='replace', index=True,
+                  dtype={
+                      "high": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "low": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "open": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "close": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "adjclose": sqlalchemy.types.Numeric(precision=8, scale=2)
+                  }
+        )
+
+        # shanghai Index
+        # Date           High          Low  ...       Volume    Adj Close                                          ...
+        # 2021-01-04  2946.540039  2869.110107  ...  1026500  2944.449951
+        df = data.get_data_yahoo("000001.SS", start_date, end_date)
+        df.columns = ['high', 'low', 'open', 'close', 'volume', 'adjclose']
+        df.high = df.high.round(2)
+        df.low = df.low.round(2)
+        df.open = df.open.round(2)
+        df.close = df.close.round(2)
+        df.adjclose = df.adjclose.round(2)
+
+        df.to_sql("index_shanghai", self.mysqldbctrl.stock_conn_sqlalchemy, if_exists='replace', index=True,
+                  dtype={
+                      "high": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "low": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "open": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "close": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "adjclose": sqlalchemy.types.Numeric(precision=8, scale=2)
+                  }
+        )
 
 
+        # tokyo Nikkei 255 Index
+        # Date           High          Low  ...       Volume    Adj Close                                          ...
+        # 2021-01-04  2946.540039  2869.110107  ...  1026500  2944.449951
+        df = data.get_data_yahoo("^N225", start_date, end_date)
+        df.columns = ['high', 'low', 'open', 'close', 'volume', 'adjclose']
+        df.high = df.high.round(2)
+        df.low = df.low.round(2)
+        df.open = df.open.round(2)
+        df.close = df.close.round(2)
+        df.adjclose = df.adjclose.round(2)
+
+        df.to_sql("index_tokyo", self.mysqldbctrl.stock_conn_sqlalchemy, if_exists='replace', index=True,
+                  dtype={
+                      "high": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "low": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "open": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "close": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "adjclose": sqlalchemy.types.Numeric(precision=8, scale=2)
+                  }
+        )
+
+        # euro stoxx Index
+        # Date           High          Low  ...       Volume    Adj Close                                          ...
+        # 2021-01-04  2946.540039  2869.110107  ...  1026500  2944.449951
+        df = data.get_data_yahoo("^STOXX", start_date, end_date)
+        df.columns = ['high', 'low', 'open', 'close', 'volume', 'adjclose']
+        df.high = df.high.round(2)
+        df.low = df.low.round(2)
+        df.open = df.open.round(2)
+        df.close = df.close.round(2)
+        df.adjclose = df.adjclose.round(2)
+
+        df.to_sql("index_eurostoxx", self.mysqldbctrl.stock_conn_sqlalchemy, if_exists='replace', index=True,
+                  dtype={
+                      "high": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "low": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "open": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "close": sqlalchemy.types.Numeric(precision=8, scale=2),
+                      "adjclose": sqlalchemy.types.Numeric(precision=8, scale=2)
+                  }
+        )
+
+
+
+        self.mysqldbctrl.clear_table('index_history')
+
+        sql = """insert into stock.index_history (date, kospi, kosdaq, dow, nasdaq, snp500, hkse, shanghai, nikkei, eurostoxx)
+                select totaldates.Date as date, kospi.close as kospi, kosdaq.close as kosdaq, 
+                dow.close as dow, nasdaq.close as nasdaq, 
+                snp500.close as snp500, hkse.close as hkse, shanghai.close as shanghai, 
+                nikkei.close as nikkei, euro.close as eurostoxx
+                from 
+                (
+                Select distinct a.Date
+                from 
+                (
+                SELECT Date
+                FROM stock.index_kospi
+                union all
+                select Date
+                FROM stock.index_dow 
+                union all
+                select Date
+                FROM stock.index_eurostoxx
+                union all
+                select Date
+                FROM stock.index_shanghai
+                order by Date) a) totaldates
+                left join stock.index_kospi kospi
+                on kospi.Date = totaldates.Date
+                left join stock.index_kosdaq kosdaq
+                on kosdaq.Date = totaldates.Date
+                left join stock.index_dow dow
+                on dow.Date = totaldates.Date
+                left join stock.index_nasdaq nasdaq
+                on nasdaq.Date = totaldates.Date
+                left join stock.index_snp500 snp500
+                on snp500.Date = totaldates.Date
+                left join stock.index_hkse hkse
+                on hkse.Date = totaldates.Date
+                left join stock.index_shanghai shanghai
+                on shanghai.Date = totaldates.Date
+                left join stock.index_tokyo nikkei
+                on nikkei.Date = totaldates.Date
+                left join stock.index_eurostoxx euro
+                on euro.Date = totaldates.Date
+                """
+
+        self.mysqldbctrl.insertstockinfo(sql)
+
+        self.mysqldbctrl.update_date_table_done('index_history')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

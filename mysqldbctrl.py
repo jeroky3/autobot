@@ -206,13 +206,12 @@ class mysql_db_ctrl:
                       'date date, ' \
                       'kospi DECIMAL(8,2), ' \
                       'kosdaq DECIMAL(8,2), ' \
-                      'kospi200 DECIMAL(8,2), ' \
                       'dow DECIMAL(8,2), '  \
                       'nasdaq DECIMAL(8,2), ' \
                       'snp500 DECIMAL(8,2), ' \
                       'hkse DECIMAL(8,2), ' \
                       'shanghai DECIMAL(8,2), ' \
-                      'tokyo DECIMAL(8,2), ' \
+                      'nikkei DECIMAL(8,2), ' \
                       'eurostoxx DECIMAL(8,2) ' \
                       ') '
             self.create_table(self.stock_conn, 'index_history', tempsql)
