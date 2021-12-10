@@ -5,3 +5,4 @@ pip install cryptography
 pip install lxml
 pip install html5lib
 pip install bs4
+pip install sqlalchemy
